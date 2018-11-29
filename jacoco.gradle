@@ -15,14 +15,17 @@ tasks.withType(Test) {
 project.afterEvaluate {
 
     try {
+
         android.applicationVariants.all { variant ->
             createTasks(variant)
+
         }
 
     } catch (Exception e) {
 
         android.libraryVariants.all { variant ->
             createTasks(variant)
+
         }
     }
 }
@@ -69,16 +72,16 @@ def createTasks(variant) {
                 "$project.projectDir/src/${variantName}/kotlin"
         ])
 
-       executionData = fileTree(dir: "$buildDir", includes: [
+        def buildType = variant.buildType.name.toUpperCase()
+        def flavor = variantName.toUpperCase().replace(buildType, "")
+        def uiPath = "outputs/code-coverage/connected/flavors/$flavor/*coverage.ec"
+
+        logger.lifecycle(uiPath)
+
+        executionData = fileTree(dir: "$buildDir", includes: [
                 "jacoco/${testTaskName}.exec",
-                "outputs/code-coverage/connected/*.ec" //Check this path or update to relevant path
+                uiPath //Check this path or update to relevant path
         ])
-
-        /*executionData = files([
-                "$project.buildDir/jacoco/${testTaskName}.exec",
-                "$project.buildDir/outputs/code-coverage/connected/flavors/$variant.flavorName/*.ec"
-        ])*/
-
     }
 }
 
