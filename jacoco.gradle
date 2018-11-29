@@ -1,0 +1,88 @@
+apply plugin: 'jacoco'
+
+//Source: https://veskoiliev.com/how-to-setup-jacoco-for-android-project-with-java-kotlin-and-multiple-flavours/
+
+jacoco {
+    toolVersion = "0.8.2"
+    // Custom reports directory can be specfied like this:
+    // reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+}
+
+project.afterEvaluate {
+
+    try {
+        android.applicationVariants.all { variant ->
+            createTasks(variant)
+        }
+
+    } catch (Exception e) {
+
+        android.libraryVariants.all { variant ->
+            createTasks(variant)
+        }
+    }
+}
+
+def createTasks(variant) {
+    def variantName = variant.name
+    def testTaskName = "test${variantName.capitalize()}UnitTest"
+    def uiTestCoverageTaskName = "create${variantName.capitalize()}CoverageReport"
+
+    tasks.create(name: "${testTaskName}Coverage", type: JacocoReport, dependsOn: ["$testTaskName", "$uiTestCoverageTaskName"]) {
+        group = "Reporting"
+        description = "Generate Jacoco coverage reports for the ${variantName.capitalize()} build."
+
+        reports {
+            html.enabled = true
+            xml.enabled = true
+        }
+
+        def excludes = [
+                '**/R.class',
+                '**/R$*.class',
+                '**/BuildConfig.*',
+                '**/Manifest*.*',
+                '**/*Test*.*',
+                'android/**/*.*',
+                '**/*$ViewInjector*.*',
+                '**/*$ViewBinder*.*',
+                '**/*$Lambda$*.*', // Jacoco can not handle several "$" in class name.
+                '**/*$inlined$*.*', // Kotlin specific, Jacoco can not handle several "$" in class name.
+                '**/*Module.*', // Modules for Dagger.
+                '**/*Dagger*.*', // Dagger auto-generated code.
+                '**/*MembersInjector*.*', // Dagger auto-generated code.
+                '**/*__MembersInjector',
+                '**/*_Provide*Factory*.*'
+        ]
+        def javaClasses = fileTree(dir: variant.javaCompiler.destinationDir, excludes: excludes)
+        def kotlinClasses = fileTree(dir: "${buildDir}/tmp/kotlin-classes/${variantName}", excludes: excludes)
+        classDirectories = files([javaClasses, kotlinClasses])
+
+        sourceDirectories = files([
+                "$project.projectDir/src/main/java",
+                "$project.projectDir/src/${variantName}/java",
+                "$project.projectDir/src/main/kotlin",
+                "$project.projectDir/src/${variantName}/kotlin"
+        ])
+
+       executionData = fileTree(dir: "$buildDir", includes: [
+                "jacoco/${testTaskName}.exec",
+                "outputs/code-coverage/connected/*.ec" //Check this path or update to relevant path
+        ])
+
+        /*executionData = files([
+                "$project.buildDir/jacoco/${testTaskName}.exec",
+                "$project.buildDir/outputs/code-coverage/connected/flavors/$variant.flavorName/*.ec"
+        ])*/
+
+    }
+}
+
+//To share the method with other gradle scripts
+ext {
+    createTasks = this.&createTasks
+}
