@@ -19,4 +19,7 @@ class Controller {
 
     }
 
+
+    fun getString(): String = "Teste!"
+
 }

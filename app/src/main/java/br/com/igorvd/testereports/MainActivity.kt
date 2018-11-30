@@ -1,7 +1,7 @@
 
 package br.com.igorvd.testereports
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -16,5 +16,9 @@ class MainActivity : AppCompatActivity() {
         val x = controller.controlSomething(false)
 
         text.setText(x.toString())
+
+        text2.setText(controller.getString())
+
+
     }
 }
