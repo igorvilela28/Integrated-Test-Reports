@@ -4,7 +4,10 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-apply from: "$rootDir/jacoco.gradle"
+//apply from: "$rootDir/jacoco.gradle"
+
+apply from: "$rootDir/tools/jacoco.gradle"
+
 
 
 android {
@@ -45,7 +48,7 @@ android {
 
    testOptions {
         animationsDisabled true
-        //execution 'ANDROIDX_TEST_ORCHESTRATOR'
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
         unitTests.returnDefaultValues = true
     }
 }
