@@ -1,20 +1,22 @@
 apply plugin: 'jacoco'
 
-def coverageExcludes = ['**/R.class',
-                        '**/R$*.class',
-                        '**/*$ViewInjector*.*',
-                        '**/*$ViewBinder*.*',
-                        '**/BuildConfig.*',
-                        '**/Manifest*.*',
-                        '**/*$Lambda$*.*', // Jacoco can not handle several "$" in class name.
-                        '**/*$inlined$*.*', // Kotlin specific, Jacoco can not handle several "$" in class name.
-                        '**/*Module.*', // Modules for Dagger.
-                        '**/*Dagger*.*', // Dagger auto-generated code.
-                        '**/*MembersInjector*.*', // Dagger auto-generated code.
-                        '**/*__MembersInjector',
-                        '**/*_Provide*Factory*.*']
-
-
+def coverageExcludes = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/*$ViewInjector*.*',
+        '**/*$ViewBinder*.*',
+        '**/*$Lambda$*.*', // Jacoco can not handle several "$" in class name.
+        '**/*$inlined$*.*', // Kotlin specific, Jacoco can not handle several "$" in class name.
+        '**/*Module.*', // Modules for Dagger.
+        '**/*Dagger*.*', // Dagger auto-generated code.
+        '**/*MembersInjector*.*', // Dagger auto-generated code.
+        '**/*__MembersInjector',
+        '**/*_Provide*Factory*.*'
+]
 
 def coverageSourceDirs = []
 def taskList = []
@@ -23,7 +25,7 @@ def modulesList = rootProject.subprojects.collect { it.project.name }.flatten()
 def executionDataList = []
 
 jacoco {
-    toolVersion = "0.8.0"
+    toolVersion = "0.8.2"
 }
 
 modulesList.each { module ->
@@ -36,7 +38,7 @@ modulesList.each { module ->
 task jacocoMergeReport(type: JacocoReport) {
     dependsOn taskList
 
-    taskList.each {executionDataList.add(tasks.getByPath(it).executionData)}
+    taskList.each { executionDataList.add(tasks.getByPath(it).executionData) }
 
     additionalSourceDirs = files(coverageSourceDirs)
     sourceDirectories = files(coverageSourceDirs)
